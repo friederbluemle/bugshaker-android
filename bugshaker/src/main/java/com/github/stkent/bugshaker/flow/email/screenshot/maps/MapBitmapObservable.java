@@ -17,11 +17,11 @@
 package com.github.stkent.bugshaker.flow.email.screenshot.maps;
 
 import android.graphics.Bitmap;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
 import rx.Observable;
@@ -29,15 +29,15 @@ import rx.Subscriber;
 
 final class MapBitmapObservable {
 
-    // NOTE: this method should only ever be called on the main thread.
-    static Observable<LocatedBitmap> create(@NonNull final MapView mapView) {
+    @MainThread
+    static Observable<LocatedBitmap> create(@NonNull final MapBitmapProvider mapBitmapProvider) {
         final int[] locationOnScreen = new int[] {0, 0};
-        mapView.getLocationOnScreen(locationOnScreen);
+        mapBitmapProvider.getLocationOnScreen(locationOnScreen);
 
         return Observable.create(new Observable.OnSubscribe<LocatedBitmap>() {
             @Override
             public void call(final Subscriber<? super LocatedBitmap> subscriber) {
-                mapView.getMapAsync(new OnMapReadyCallback() {
+                mapBitmapProvider.getMapAsync(new OnMapReadyCallback() {
                     @Override
                     public void onMapReady(@NonNull final GoogleMap googleMap) {
                         googleMap.snapshot(new GoogleMap.SnapshotReadyCallback() {

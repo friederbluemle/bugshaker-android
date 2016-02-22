@@ -82,45 +82,49 @@ public final class MapScreenshotProvider extends BaseScreenshotProvider {
         final Observable<Bitmap> nonMapViewsBitmapObservable = getNonMapViewsBitmap(activity);
 
         final View rootView = ActivityUtils.getRootView(activity);
-        final List<MapView> mapViews = locateMapViewsInHierarchy(rootView);
+        final List<MapBitmapProvider> mapBitmapProviders = locateMapsInHierarchy(rootView);
 
-        if (mapViews.isEmpty()) {
+        if (mapBitmapProviders.isEmpty()) {
             return nonMapViewsBitmapObservable;
         } else {
             final Observable<List<LocatedBitmap>> mapViewBitmapsObservable
-                    = getMapViewBitmapsObservable(mapViews);
+                    = getMapBitmapsObservable(mapBitmapProviders);
 
-            return Observable
-                    .zip(nonMapViewsBitmapObservable, mapViewBitmapsObservable, BITMAP_COMBINING_FUNCTION);
+            return Observable.zip(
+                    nonMapViewsBitmapObservable,
+                    mapViewBitmapsObservable,
+                    BITMAP_COMBINING_FUNCTION);
         }
     }
 
     @NonNull
-    private Observable<List<LocatedBitmap>> getMapViewBitmapsObservable(@NonNull final List<MapView> mapViews) {
+    private Observable<List<LocatedBitmap>> getMapBitmapsObservable(
+            @NonNull final List<MapBitmapProvider> mapBitmapProviders) {
+
         return Observable
-                .from(mapViews)
-                .concatMap(new Func1<MapView, Observable<LocatedBitmap>>() {
+                .from(mapBitmapProviders)
+                .concatMap(new Func1<MapBitmapProvider, Observable<LocatedBitmap>>() {
                     @Override
-                    public Observable<LocatedBitmap> call(@NonNull final MapView mapView) {
-                        return MapBitmapObservable.create(mapView);
+                    public Observable<LocatedBitmap> call(
+                            @NonNull final MapBitmapProvider mapBitmapProvider) {
+
+                        return MapBitmapObservable.create(mapBitmapProvider);
                     }
                 })
                 .toList();
     }
 
     @NonNull
-    private List<MapView> locateMapViewsInHierarchy(@NonNull final View view) {
-        final List<MapView> result = new ArrayList<>();
+    private List<MapBitmapProvider> locateMapsInHierarchy(@NonNull final View view) {
+        final List<MapBitmapProvider> result = new ArrayList<>();
 
         if (view instanceof MapView && view.getVisibility() == View.VISIBLE) {
-            // Yes, MapView is a ViewGroup, but I never want to see anyone nesting a MapView
-            // inside another MapView...
-            result.add((MapView) view);
+            result.add(new MapViewBitmapProvider((MapView) view));
         } else if (view instanceof ViewGroup) {
             final ViewGroup viewGroup = (ViewGroup) view;
 
             for (int childIndex = 0; childIndex < viewGroup.getChildCount(); childIndex++) {
-                result.addAll(locateMapViewsInHierarchy(viewGroup.getChildAt(childIndex)));
+                result.addAll(locateMapsInHierarchy(viewGroup.getChildAt(childIndex)));
             }
         }
 
