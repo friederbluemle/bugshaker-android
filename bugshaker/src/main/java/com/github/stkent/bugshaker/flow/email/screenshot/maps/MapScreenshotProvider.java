@@ -45,11 +45,11 @@ public final class MapScreenshotProvider extends BaseScreenshotProvider {
             = new Func2<Bitmap, List<LocatedBitmap>, Bitmap>() {
                 @Override
                 public Bitmap call(
-                        final Bitmap baseLocatedBitmap,
-                        final List<LocatedBitmap> overlayLocatedBitmaps) {
+                        final Bitmap baseBitmap,
+                        final List<LocatedBitmap> locatedOverlayBitmaps) {
 
-                    for (final LocatedBitmap locatedBitmap : overlayLocatedBitmaps) {
-                        final Canvas canvas = new Canvas(baseLocatedBitmap);
+                    for (final LocatedBitmap locatedBitmap : locatedOverlayBitmaps) {
+                        final Canvas canvas = new Canvas(baseBitmap);
                         final int[] overlayLocation = locatedBitmap.getLocation();
 
                         canvas.drawBitmap(
@@ -59,7 +59,7 @@ public final class MapScreenshotProvider extends BaseScreenshotProvider {
                                 MAP_PAINT);
                     }
 
-                    return baseLocatedBitmap;
+                    return baseBitmap;
                 }
     };
 
