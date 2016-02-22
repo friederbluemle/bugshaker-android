@@ -30,13 +30,13 @@ import rx.Subscriber;
 final class MapBitmapObservable {
 
     @MainThread
-    static Observable<LocatedBitmap> create(@NonNull final MapBitmapProvider mapBitmapProvider) {
+    static Observable<MapBitmap> create(@NonNull final MapBitmapProvider mapBitmapProvider) {
         final int[] locationOnScreen = new int[] {0, 0};
         mapBitmapProvider.getLocationOnScreen(locationOnScreen);
 
-        return Observable.create(new Observable.OnSubscribe<LocatedBitmap>() {
+        return Observable.create(new Observable.OnSubscribe<MapBitmap>() {
             @Override
-            public void call(final Subscriber<? super LocatedBitmap> subscriber) {
+            public void call(final Subscriber<? super MapBitmap> subscriber) {
                 mapBitmapProvider.getMapAsync(new OnMapReadyCallback() {
                     @Override
                     public void onMapReady(@NonNull final GoogleMap googleMap) {
@@ -45,7 +45,7 @@ final class MapBitmapObservable {
                             public void onSnapshotReady(@Nullable final Bitmap bitmap) {
                                 if (bitmap != null) {
                                     subscriber.onNext(
-                                            new LocatedBitmap(bitmap, locationOnScreen));
+                                            new MapBitmap(bitmap, locationOnScreen));
 
                                     subscriber.onCompleted();
                                 } else {

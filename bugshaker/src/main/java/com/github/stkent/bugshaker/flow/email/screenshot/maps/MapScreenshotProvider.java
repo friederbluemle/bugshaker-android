@@ -41,19 +41,19 @@ import rx.functions.Func2;
 
 public final class MapScreenshotProvider extends BaseScreenshotProvider {
 
-    private static final Func2<Bitmap, List<LocatedBitmap>, Bitmap> BITMAP_COMBINING_FUNCTION
-            = new Func2<Bitmap, List<LocatedBitmap>, Bitmap>() {
+    private static final Func2<Bitmap, List<MapBitmap>, Bitmap> BITMAP_COMBINING_FUNCTION
+            = new Func2<Bitmap, List<MapBitmap>, Bitmap>() {
                 @Override
                 public Bitmap call(
                         final Bitmap baseBitmap,
-                        final List<LocatedBitmap> locatedOverlayBitmaps) {
+                        final List<MapBitmap> mapBitmaps) {
 
-                    for (final LocatedBitmap locatedBitmap : locatedOverlayBitmaps) {
+                    for (final MapBitmap mapBitmap : mapBitmaps) {
                         final Canvas canvas = new Canvas(baseBitmap);
-                        final int[] overlayLocation = locatedBitmap.getLocation();
+                        final int[] overlayLocation = mapBitmap.getLocationOnScreen();
 
                         canvas.drawBitmap(
-                                locatedBitmap.getBitmap(),
+                                mapBitmap.getBitmap(),
                                 overlayLocation[0],
                                 overlayLocation[1],
                                 MAP_PAINT);
@@ -87,7 +87,7 @@ public final class MapScreenshotProvider extends BaseScreenshotProvider {
         if (mapBitmapProviders.isEmpty()) {
             return nonMapViewsBitmapObservable;
         } else {
-            final Observable<List<LocatedBitmap>> mapViewBitmapsObservable
+            final Observable<List<MapBitmap>> mapViewBitmapsObservable
                     = getMapBitmapsObservable(mapBitmapProviders);
 
             return Observable.zip(
@@ -98,14 +98,14 @@ public final class MapScreenshotProvider extends BaseScreenshotProvider {
     }
 
     @NonNull
-    private Observable<List<LocatedBitmap>> getMapBitmapsObservable(
+    private Observable<List<MapBitmap>> getMapBitmapsObservable(
             @NonNull final List<MapBitmapProvider> mapBitmapProviders) {
 
         return Observable
                 .from(mapBitmapProviders)
-                .concatMap(new Func1<MapBitmapProvider, Observable<LocatedBitmap>>() {
+                .concatMap(new Func1<MapBitmapProvider, Observable<MapBitmap>>() {
                     @Override
-                    public Observable<LocatedBitmap> call(
+                    public Observable<MapBitmap> call(
                             @NonNull final MapBitmapProvider mapBitmapProvider) {
 
                         return MapBitmapObservable.create(mapBitmapProvider);
